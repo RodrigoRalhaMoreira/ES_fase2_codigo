@@ -6,8 +6,10 @@ import java.util.Optional;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
 
+import org.jabref.logic.l10n.Localization;
 import org.jabref.model.entry.BibEntry;
 import org.jabref.model.search.SearchMatcher;
 import org.jabref.model.strings.StringUtil;
@@ -29,6 +31,8 @@ public abstract class AbstractGroup implements SearchMatcher {
     protected boolean isExpanded = true;
     protected Optional<String> description = Optional.empty();
     protected Optional<String> iconName = Optional.empty();
+
+    protected Optional<String> note = Optional.empty();
 
     protected AbstractGroup(String name, GroupHierarchyType context) {
         this.name.setValue(name);
@@ -93,11 +97,21 @@ public abstract class AbstractGroup implements SearchMatcher {
         return description;
     }
 
+    public Optional<String> getNote() {return note;}
+
     public void setDescription(String description) {
         if (StringUtil.isBlank(description)) {
             this.description = Optional.empty();
         } else {
             this.description = Optional.of(description);
+        }
+    }
+
+    public void setNote(String note) {
+        if (StringUtil.isBlank(note)) {
+            this.note = Optional.empty();
+        } else {
+            this.note = Optional.of(note);
         }
     }
 

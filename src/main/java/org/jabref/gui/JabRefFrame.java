@@ -86,11 +86,7 @@ import org.jabref.gui.help.ErrorConsoleAction;
 import org.jabref.gui.help.HelpAction;
 import org.jabref.gui.help.SearchForUpdateAction;
 import org.jabref.gui.icon.IconTheme;
-import org.jabref.gui.importer.GenerateEntryFromIdDialog;
-import org.jabref.gui.importer.ImportCommand;
-import org.jabref.gui.importer.ImportEntriesDialog;
-import org.jabref.gui.importer.NewDatabaseAction;
-import org.jabref.gui.importer.NewEntryAction;
+import org.jabref.gui.importer.*;
 import org.jabref.gui.importer.actions.OpenDatabaseAction;
 import org.jabref.gui.importer.fetcher.LookupIdentifierAction;
 import org.jabref.gui.integrity.IntegrityCheckAction;
@@ -166,6 +162,7 @@ public class JabRefFrame extends BorderPane {
 
     @SuppressWarnings({"FieldCanBeLocal"}) private EasyObservableList<BibDatabaseContext> openDatabaseList;
 
+
     private final Stage mainStage;
     private final StateManager stateManager;
     private final CountingUndoManager undoManager;
@@ -175,6 +172,9 @@ public class JabRefFrame extends BorderPane {
     private TabPane tabbedPane;
     private PopOver progressViewPopOver;
     private PopOver entryFromIdPopOver;
+    private PopOver notePopOver;
+    private PopOver authorPopOver;
+
 
     private final TaskExecutor taskExecutor;
 
@@ -351,8 +351,8 @@ public class JabRefFrame extends BorderPane {
                 prefs.clearEditedFiles();
             } else {
                 Path focusedDatabase = getCurrentLibraryTab().getBibDatabaseContext()
-                                                             .getDatabasePath()
-                                                             .orElse(null);
+                        .getDatabasePath()
+                        .orElse(null);
                 prefs.getGuiPreferences().setLastFilesOpened(filenames);
                 prefs.getGuiPreferences().setLastFocusedFile(focusedDatabase);
             }
@@ -498,6 +498,8 @@ public class JabRefFrame extends BorderPane {
                 rightSpacer,
 
                 new HBox(
+                        createFilterForAuthors(),
+                        createFilterForNotes(),
                         factory.createIconButton(StandardActions.NEW_ARTICLE, new NewEntryAction(this, StandardEntryType.Article, dialogService, prefs, stateManager)),
                         factory.createIconButton(StandardActions.NEW_ENTRY, new NewEntryAction(this, dialogService, prefs, stateManager)),
                         createNewEntryFromIdButton(),
@@ -563,8 +565,8 @@ public class JabRefFrame extends BorderPane {
      */
     public List<LibraryTab> getLibraryTabs() {
         return tabbedPane.getTabs().stream()
-                         .map(tab -> (LibraryTab) tab)
-                         .collect(Collectors.toList());
+                .map(tab -> (LibraryTab) tab)
+                .collect(Collectors.toList());
     }
 
     public void showLibraryTabAt(int i) {
@@ -596,9 +598,9 @@ public class JabRefFrame extends BorderPane {
         stateManager.activeDatabaseProperty().bind(
                 EasyBind.map(tabbedPane.getSelectionModel().selectedItemProperty(),
                         selectedTab -> Optional.ofNullable(selectedTab)
-                                               .filter(tab -> tab instanceof LibraryTab)
-                                               .map(tab -> (LibraryTab) tab)
-                                               .map(LibraryTab::getBibDatabaseContext)));
+                                .filter(tab -> tab instanceof LibraryTab)
+                                .map(tab -> (LibraryTab) tab)
+                                .map(LibraryTab::getBibDatabaseContext)));
 
         // Subscribe to the search
         EasyBind.subscribe(stateManager.activeSearchQueryProperty(),
@@ -943,6 +945,66 @@ public class JabRefFrame extends BorderPane {
         return newEntryFromIdButton;
     }
 
+    private Button createFilterForAuthors() {
+        Button AuthorFilter = new Button();
+        AuthorFilter.setGraphic(IconTheme.JabRefIcons.PRIORITY.getGraphicNode());
+        AuthorFilter.getStyleClass().setAll("icon-button");
+        AuthorFilter.setFocusTraversable(false);
+        AuthorFilter.disableProperty().bind(ActionHelper.needsDatabase(stateManager).not());
+        //factory.createIconButton(StandardActions.FIND_NOTE, new NewEntryAction(this, StandardEntryType.Article, dialogService, prefs, stateManager)),
+        AuthorFilter.setOnMouseClicked(event -> {
+            GenerateAuthorsFromCountry authorsFromCountry = new GenerateAuthorsFromCountry(getCurrentLibraryTab(), dialogService, prefs, taskExecutor, stateManager);
+
+            if (authorPopOver == null) {
+                authorPopOver = new PopOver(authorsFromCountry.getDialogPane());
+                authorPopOver.setTitle(Localization.lang("Find Authors"));
+                authorPopOver.setArrowLocation(PopOver.ArrowLocation.TOP_CENTER);
+                authorPopOver.setContentNode(authorsFromCountry.getDialogPane());
+                authorPopOver.show(AuthorFilter);
+                authorsFromCountry.setNoteFromPopOver(authorPopOver);
+            } else if (authorPopOver.isShowing()) {
+                authorPopOver.hide();
+            } else {
+                authorPopOver.setContentNode(authorsFromCountry.getDialogPane());
+                authorPopOver.show(AuthorFilter);
+                authorsFromCountry.setNoteFromPopOver(authorPopOver);
+            }
+        });
+        AuthorFilter.setTooltip(new Tooltip(Localization.lang("Find Authors")));
+
+        return AuthorFilter;
+    }
+
+    private Button createFilterForNotes() {
+        Button NoteFilter = new Button();
+        NoteFilter.setGraphic(IconTheme.JabRefIcons.SEARCH.getGraphicNode());
+        NoteFilter.getStyleClass().setAll("icon-button");
+        NoteFilter.setFocusTraversable(false);
+        NoteFilter.disableProperty().bind(ActionHelper.needsDatabase(stateManager).not());
+        //factory.createIconButton(StandardActions.FIND_NOTE, new NewEntryAction(this, StandardEntryType.Article, dialogService, prefs, stateManager)),
+        NoteFilter.setOnMouseClicked(event -> {
+            GenerateEntriesFromNoteSearch entriesFromNote = new GenerateEntriesFromNoteSearch(getCurrentLibraryTab(), dialogService, prefs, taskExecutor, stateManager);
+
+            if (notePopOver == null) {
+                notePopOver = new PopOver(entriesFromNote.getDialogPane());
+                notePopOver.setTitle(Localization.lang("Find Note"));
+                notePopOver.setArrowLocation(PopOver.ArrowLocation.TOP_CENTER);
+                notePopOver.setContentNode(entriesFromNote.getDialogPane());
+                notePopOver.show(NoteFilter);
+                entriesFromNote.setNoteFromPopOver(notePopOver);
+            } else if (notePopOver.isShowing()) {
+                notePopOver.hide();
+            } else {
+                notePopOver.setContentNode(entriesFromNote.getDialogPane());
+                notePopOver.show(NoteFilter);
+                entriesFromNote.setNoteFromPopOver(notePopOver);
+            }
+        });
+        NoteFilter.setTooltip(new Tooltip(Localization.lang("Find Note")));
+
+        return NoteFilter;
+    }
+
     private Group createTaskIndicator() {
         ProgressIndicator indicator = new ProgressIndicator();
         indicator.getStyleClass().add("progress-indicatorToolbar");
@@ -1013,10 +1075,10 @@ public class JabRefFrame extends BorderPane {
         } else {
             // only add tab if DB is not already open
             Optional<LibraryTab> libraryTab = getLibraryTabs().stream()
-                                                              .filter(p -> p.getBibDatabaseContext()
-                                                                            .getDatabasePath()
-                                                                            .equals(parserResult.getPath()))
-                                                              .findFirst();
+                    .filter(p -> p.getBibDatabaseContext()
+                            .getDatabasePath()
+                            .equals(parserResult.getPath()))
+                    .findFirst();
 
             if (libraryTab.isPresent()) {
                 tabbedPane.getSelectionModel().select(libraryTab.get());
@@ -1134,10 +1196,10 @@ public class JabRefFrame extends BorderPane {
      */
     private boolean confirmClose(LibraryTab libraryTab) {
         String filename = libraryTab.getBibDatabaseContext()
-                                    .getDatabasePath()
-                                    .map(Path::toAbsolutePath)
-                                    .map(Path::toString)
-                                    .orElse(Localization.lang("untitled"));
+                .getDatabasePath()
+                .map(Path::toAbsolutePath)
+                .map(Path::toString)
+                .orElse(Localization.lang("untitled"));
 
         ButtonType saveChanges = new ButtonType(Localization.lang("Save changes"), ButtonBar.ButtonData.YES);
         ButtonType discardChanges = new ButtonType(Localization.lang("Discard changes"), ButtonBar.ButtonData.NO);
@@ -1172,10 +1234,10 @@ public class JabRefFrame extends BorderPane {
      */
     private Boolean confirmEmptyEntry(LibraryTab libraryTab, BibDatabaseContext context) {
         String filename = libraryTab.getBibDatabaseContext()
-                                    .getDatabasePath()
-                                    .map(Path::toAbsolutePath)
-                                    .map(Path::toString)
-                                    .orElse(Localization.lang("untitled"));
+                .getDatabasePath()
+                .map(Path::toAbsolutePath)
+                .map(Path::toString)
+                .orElse(Localization.lang("untitled"));
 
         ButtonType deleteEmptyEntries = new ButtonType(Localization.lang("Delete empty entries"), ButtonBar.ButtonData.YES);
         ButtonType keepEmptyEntries = new ButtonType(Localization.lang("Keep empty entries"), ButtonBar.ButtonData.NO);
@@ -1375,4 +1437,6 @@ public class JabRefFrame extends BorderPane {
             */
         }
     }
+
+
 }

@@ -144,7 +144,10 @@ public enum StandardField implements Field {
     OWNER("owner"),
     TIMESTAMP("timestamp", FieldProperty.DATE),
     CREATIONDATE("creationdate", FieldProperty.DATE),
-    MODIFICATIONDATE("modificationdate", FieldProperty.DATE);
+    MODIFICATIONDATE("modificationdate", FieldProperty.DATE),
+
+    //For author information
+    COUNTRY("country");
 
 
     private final String name;
@@ -177,8 +180,8 @@ public enum StandardField implements Field {
 
     public static Optional<StandardField> fromName(String name) {
         return Arrays.stream(StandardField.values())
-                     .filter(field -> field.getName().equalsIgnoreCase(name))
-                     .findAny();
+                .filter(field -> field.getName().equalsIgnoreCase(name))
+                .findAny();
     }
 
     @Override

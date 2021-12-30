@@ -1,31 +1,15 @@
 package org.jabref.gui.entryeditor;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
+import com.airhacks.afterburner.views.ViewLoader;
+import com.tobiasdiez.easybind.EasyBind;
+import com.tobiasdiez.easybind.Subscription;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
-
 import org.jabref.gui.DialogService;
 import org.jabref.gui.Globals;
 import org.jabref.gui.LibraryTab;
@@ -53,12 +37,14 @@ import org.jabref.model.entry.BibEntry;
 import org.jabref.model.entry.field.Field;
 import org.jabref.model.util.FileUpdateMonitor;
 import org.jabref.preferences.PreferencesService;
-
-import com.airhacks.afterburner.views.ViewLoader;
-import com.tobiasdiez.easybind.EasyBind;
-import com.tobiasdiez.easybind.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.io.File;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * GUI component that allows editing of the fields of a BibEntry (i.e. the one that shows up, when you double click on
@@ -78,19 +64,19 @@ public class EntryEditor extends BorderPane {
     private final EntryEditorPreferences entryEditorPreferences;
     private final ExternalFilesEntryLinker fileLinker;
     /*
-    * Tabs which can apply filter, but seems non-sense
-    * */
+     * Tabs which can apply filter, but seems non-sense
+     * */
     private final List<EntryEditorTab> tabs;
     private Subscription typeSubscription;
     /*
-    * A reference to the entry this editor works on.
-    * */
+     * A reference to the entry this editor works on.
+     * */
     private BibEntry entry;
     private SourceTab sourceTab;
 
     /*
-    * tabs to be showed in GUI
-    * */
+     * tabs to be showed in GUI
+     * */
     @FXML private TabPane tabbed;
 
     @FXML private Button typeChangeButton;
@@ -109,8 +95,8 @@ public class EntryEditor extends BorderPane {
         this.databaseContext = libraryTab.getBibDatabaseContext();
 
         ViewLoader.view(this)
-                  .root(this)
-                  .load();
+                .root(this)
+                .load();
 
         this.entryEditorPreferences = preferencesService.getEntryEditorPreferences();
         this.fileLinker = new ExternalFilesEntryLinker(externalFileTypes, preferencesService.getFilePreferences(),
@@ -237,6 +223,9 @@ public class EntryEditor extends BorderPane {
 
         // Required fields
         entryEditorTabs.add(new RequiredFieldsTab(databaseContext, libraryTab.getSuggestionProviders(), undoManager, dialogService, preferencesService, stateManager, Globals.entryTypesManager, ExternalFileTypes.getInstance(), Globals.TASK_EXECUTOR, Globals.journalAbbreviationRepository));
+
+        // Author information
+        entryEditorTabs.add(new AuthorInformationTab(databaseContext, libraryTab.getSuggestionProviders(), undoManager, dialogService, preferencesService, stateManager, Globals.entryTypesManager, ExternalFileTypes.getInstance(), Globals.TASK_EXECUTOR, Globals.journalAbbreviationRepository));
 
         // Optional fields
         entryEditorTabs.add(new OptionalFieldsTab(databaseContext, libraryTab.getSuggestionProviders(), undoManager, dialogService, preferencesService, stateManager, Globals.entryTypesManager, ExternalFileTypes.getInstance(), Globals.TASK_EXECUTOR, Globals.journalAbbreviationRepository));
@@ -396,7 +385,7 @@ public class EntryEditor extends BorderPane {
         DefaultTaskExecutor.runInJavaFXThread(() -> {
             for (Tab tab : tabbed.getTabs()) {
                 if ((tab instanceof FieldsEditorTab fieldsEditorTab) && fieldsEditorTab.getShownFields()
-                                                                                     .contains(field)) {
+                        .contains(field)) {
                     tabbed.getSelectionModel().select(tab);
                     fieldsEditorTab.requestFocus(field);
                 }

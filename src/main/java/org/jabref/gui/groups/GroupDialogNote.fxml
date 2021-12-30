@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.geometry.Insets?>
+<DialogPane prefHeight="300.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.2-internal"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.jabref.gui.groups.GroupDialogNoteView">
+    <content>
+        <fx:define>
+            <ToggleGroup fx:id="hierarchicalContext"/>
+            <ToggleGroup fx:id="type"/>
+            <ToggleGroup fx:id="autoGroupOptions"/>
+        </fx:define>
+        <VBox spacing="10.0" minWidth="200">
+            <padding>
+                <Insets bottom="4.0" left="4.0" right="4.0"/>
+            </padding>
+            <VBox>
+                <Label fx:id="addOrEditNote"/>
+                <TextField fx:id="groupNote"/>
+            </VBox>
+
+        </VBox>
+    </content>
+</DialogPane>

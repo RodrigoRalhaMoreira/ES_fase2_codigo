@@ -135,8 +135,8 @@ public class GroupTreeViewModel extends AbstractViewModel {
             }
             selectedGroups.setAll(
                     stateManager.getSelectedGroup(newDatabase.get()).stream()
-                                .map(selectedGroup -> new GroupNodeViewModel(newDatabase.get(), stateManager, taskExecutor, selectedGroup, localDragboard, preferences))
-                                .collect(Collectors.toList()));
+                            .map(selectedGroup -> new GroupNodeViewModel(newDatabase.get(), stateManager, taskExecutor, selectedGroup, localDragboard, preferences))
+                            .collect(Collectors.toList()));
         } else {
             rootGroup.setValue(null);
         }
@@ -156,7 +156,6 @@ public class GroupTreeViewModel extends AbstractViewModel {
                     preferences,
                     null,
                     groupDialogHeader));
-
             newGroup.ifPresent(group -> {
                 parent.addSubgroup(group);
 
@@ -171,6 +170,7 @@ public class GroupTreeViewModel extends AbstractViewModel {
                 writeGroupChangesToMetaData();
             });
         });
+
     }
 
     private void writeGroupChangesToMetaData() {
@@ -241,6 +241,53 @@ public class GroupTreeViewModel extends AbstractViewModel {
         });
     }
 
+    public boolean hasNote(GroupNodeViewModel oldGroup){
+        return false;
+    }
+
+    public void addNote(GroupNodeViewModel oldGroup, int editNote) {
+        currentDatabase.ifPresent(database -> {
+            Optional<AbstractGroup> newGroup = dialogService.showCustomDialogAndWait(new GroupDialogNoteView(
+                    dialogService,
+                    database,
+                    preferences,
+                    oldGroup.getGroupNode().getGroup(),
+                    GroupDialogHeader.SUBGROUP));
+
+
+            newGroup.ifPresent(group -> {
+                // TODO: Keep assignments
+                boolean keepPreviousAssignments = dialogService.showConfirmationDialogAndWait(
+                        Localization.lang("Change of Grouping Method"),
+                        Localization.lang("Assign the original group's entries to this group?"));
+                //        WarnAssignmentSideEffects.warnAssignmentSideEffects(newGroup, panel.frame());
+                boolean removePreviousAssignments = (oldGroup.getGroupNode().getGroup() instanceof ExplicitGroup)
+                        && (group instanceof ExplicitGroup);
+
+                int groupsWithSameName = 0;
+                Optional<GroupTreeNode> databaseRootGroup = currentDatabase.get().getMetaData().getGroups();
+                if (databaseRootGroup.isPresent()) {
+                    String name = oldGroup.getGroupNode().getGroup().getName();
+                    groupsWithSameName = databaseRootGroup.get().findChildrenSatisfying(g -> g.getName().equals(name)).size();
+                }
+                if (groupsWithSameName >= 2) {
+                    removePreviousAssignments = false;
+                }
+
+                oldGroup.getGroupNode().setGroup(
+                        group,
+                        keepPreviousAssignments,
+                        removePreviousAssignments,
+                        database.getEntries());
+
+                dialogService.notify(Localization.lang("Modified group \"%0\".", group.getName()));
+                writeGroupChangesToMetaData();
+
+                refresh();
+            });
+        });
+    }
+
     public void removeSubgroups(GroupNodeViewModel group) {
         boolean confirmation = dialogService.showConfirmationDialogAndWait(
                 Localization.lang("Remove subgroups"),
@@ -269,7 +316,7 @@ public class GroupTreeViewModel extends AbstractViewModel {
             // panel.getUndoManager().addEdit(undo);
             GroupTreeNode groupNode = group.getGroupNode();
             groupNode.getParent()
-                     .ifPresent(parent -> groupNode.moveAllChildrenTo(parent, parent.getIndexOfChild(groupNode).get()));
+                    .ifPresent(parent -> groupNode.moveAllChildrenTo(parent, parent.getIndexOfChild(groupNode).get()));
             groupNode.removeFromParent();
 
             dialogService.notify(Localization.lang("Removed group \"%0\".", group.getDisplayName()));

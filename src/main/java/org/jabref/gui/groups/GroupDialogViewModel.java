@@ -60,6 +60,8 @@ import de.saxsys.mvvmfx.utils.validation.ValidationMessage;
 import de.saxsys.mvvmfx.utils.validation.ValidationStatus;
 import de.saxsys.mvvmfx.utils.validation.Validator;
 
+import javax.print.DocFlavor;
+
 public class GroupDialogViewModel {
     // Basic Settings
     private final StringProperty nameProperty = new SimpleStringProperty("");
@@ -68,6 +70,7 @@ public class GroupDialogViewModel {
     private final ObjectProperty<Color> colorProperty = new SimpleObjectProperty<>();
     private final ListProperty<GroupHierarchyType> groupHierarchyListProperty = new SimpleListProperty<>();
     private final ObjectProperty<GroupHierarchyType> groupHierarchySelectedProperty = new SimpleObjectProperty<>();
+    private final StringProperty noteProperty = new SimpleStringProperty("");
 
     // Type
     private final BooleanProperty typeExplicitProperty = new SimpleBooleanProperty();
@@ -123,6 +126,7 @@ public class GroupDialogViewModel {
     }
 
     private void setupValidation() {
+
         nameValidator = new FunctionBasedValidator<>(
                 nameProperty,
                 StringUtil::isNotBlank,
@@ -154,8 +158,8 @@ public class GroupDialogViewModel {
                     return true;
                 },
                 ValidationMessage.warning(
-                    Localization.lang("There exists already a group with the same name.") + "\n" +
-                    Localization.lang("If you use it, it will inherit all entries from this other group.")
+                        Localization.lang("There exists already a group with the same name.") + "\n" +
+                                Localization.lang("If you use it, it will inherit all entries from this other group.")
                 )
         );
 
@@ -361,6 +365,7 @@ public class GroupDialogViewModel {
                 resultingGroup.setColor(colorProperty.getValue());
                 resultingGroup.setDescription(descriptionProperty.getValue());
                 resultingGroup.setIconName(iconProperty.getValue());
+                resultingGroup.setNote(noteProperty.getValue());
                 return resultingGroup;
             }
 
@@ -385,6 +390,7 @@ public class GroupDialogViewModel {
             descriptionProperty.setValue(editedGroup.getDescription().orElse(""));
             iconProperty.setValue(editedGroup.getIconName().orElse(""));
             groupHierarchySelectedProperty.setValue(editedGroup.getHierarchicalContext());
+            noteProperty.setValue(editedGroup.getNote().orElse(""));
 
             if (editedGroup.getClass() == WordKeywordGroup.class) {
                 typeKeywordsProperty.setValue(true);
@@ -436,12 +442,12 @@ public class GroupDialogViewModel {
                 .addExtensionFilter(StandardFileType.AUX)
                 .withDefaultExtension(StandardFileType.AUX)
                 .withInitialDirectory(currentDatabase.getMetaData()
-                                                     .getLatexFileDirectory(preferencesService.getFilePreferences().getUser())
-                                                     .orElse(FileUtil.getInitialDirectory(currentDatabase, preferencesService.getFilePreferences().getWorkingDirectory()))).build();
+                        .getLatexFileDirectory(preferencesService.getFilePreferences().getUser())
+                        .orElse(FileUtil.getInitialDirectory(currentDatabase, preferencesService.getFilePreferences().getWorkingDirectory()))).build();
         dialogService.showFileOpenDialog(fileDialogConfiguration)
-                     .ifPresent(file -> texGroupFilePathProperty.setValue(
-                             FileUtil.relativize(file.toAbsolutePath(), getFileDirectoriesAsPaths()).toString()
-                     ));
+                .ifPresent(file -> texGroupFilePathProperty.setValue(
+                        FileUtil.relativize(file.toAbsolutePath(), getFileDirectoriesAsPaths()).toString()
+                ));
     }
 
     public void openHelpPage() {
@@ -502,6 +508,10 @@ public class GroupDialogViewModel {
 
     public StringProperty descriptionProperty() {
         return descriptionProperty;
+    }
+
+    public StringProperty noteProperty() {
+        return noteProperty;
     }
 
     public StringProperty iconProperty() {

@@ -1,11 +1,11 @@
 package org.jabref.gui.actions;
 
-import java.util.Optional;
-
 import org.jabref.gui.icon.IconTheme;
 import org.jabref.gui.icon.JabRefIcon;
 import org.jabref.gui.keyboard.KeyBinding;
 import org.jabref.logic.l10n.Localization;
+
+import java.util.Optional;
 
 public enum StandardActions implements Action {
 
@@ -174,7 +174,8 @@ public enum StandardActions implements Action {
     EDIT_LIST(Localization.lang("Edit"), IconTheme.JabRefIcons.EDIT),
     VIEW_LIST(Localization.lang("View"), IconTheme.JabRefIcons.FILE),
     REMOVE_LIST(Localization.lang("Remove"), IconTheme.JabRefIcons.REMOVE),
-    RELOAD_LIST(Localization.lang("Reload"), IconTheme.JabRefIcons.REFRESH);
+    RELOAD_LIST(Localization.lang("Reload"), IconTheme.JabRefIcons.REFRESH),
+    FIND_NOTE(Localization.lang("Find Note"), IconTheme.JabRefIcons.SEARCH);
 
     private final String text;
     private final String description;

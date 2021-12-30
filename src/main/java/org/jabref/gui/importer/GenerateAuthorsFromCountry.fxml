@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.Pane?>
+
+<?import javafx.scene.control.ListView?>
+<DialogPane fx:id="dialogPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="320.0" prefWidth="392.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.jabref.gui.importer.GenerateAuthorsFromCountry">
+    <content>
+        <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="102.0" prefWidth="360.0">
+            <TextField fx:id="idTextField" layoutX="14.0" layoutY="40.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="29.0" prefWidth="287.0" />
+            <Button fx:id="generateButton" layoutX="314.0" layoutY="40.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#setListView" prefHeight="30.0" prefWidth="55.0" textAlignment="CENTER" />
+            <Label layoutX="14.0" layoutY="14.0" prefHeight="16.0" prefWidth="328.0" text="Search the authors' country: "/>
+            <ListView fx:id="listOfEntries" layoutY="100.0" layoutX="35.0" prefWidth="300.0" prefHeight="200.0" />
+        </Pane>
+    </content>
+</DialogPane>

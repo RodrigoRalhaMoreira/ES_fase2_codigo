@@ -80,6 +80,8 @@ public class GroupTreeView extends BorderPane {
 
     private DragExpansionHandler dragExpansionHandler;
 
+    private int editNote = -1;
+
     /**
      * The groups panel
      *
@@ -396,6 +398,14 @@ public class GroupTreeView extends BorderPane {
             viewModel.editGroup(group);
             groupTree.refresh();
         });
+        String note  = "Edit Note";
+        MenuItem groupNote = new MenuItem(Localization.lang(note));
+        groupNote.setOnAction(event -> {
+            menu.hide();
+            viewModel.addNote(group,editNote);
+            editNote = 1;
+            groupTree.refresh();
+        });
 
         MenuItem removeGroupKeepSubgroups = new MenuItem(Localization.lang("Keep subgroups"));
         removeGroupKeepSubgroups.setOnAction(event -> viewModel.removeGroupKeepSubgroups(group));
@@ -423,6 +433,7 @@ public class GroupTreeView extends BorderPane {
         MenuItem removeEntries = new MenuItem(Localization.lang("Remove selected entries from this group"));
         removeEntries.setOnAction(event -> viewModel.removeSelectedEntries(group));
 
+        menu.getItems().add(groupNote);
         menu.getItems().add(editGroup);
         removeGroup.getItems().add(removeGroupKeepSubgroups);
         removeGroup.getItems().add(removeGroupAndSubgroups);
@@ -456,6 +467,7 @@ public class GroupTreeView extends BorderPane {
 
     private void addNewGroup() {
         viewModel.addNewGroupToRoot();
+
     }
 
     /**

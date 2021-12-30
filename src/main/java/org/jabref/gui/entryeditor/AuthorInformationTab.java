@@ -52,4 +52,6 @@ public class AuthorInformationTab extends FieldsEditorTab {
             return Collections.emptySet();
         }
     }
+
+
 }

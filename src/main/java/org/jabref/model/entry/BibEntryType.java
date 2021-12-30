@@ -145,4 +145,13 @@ public class BibEntryType implements Comparable<BibEntryType> {
     public int compareTo(BibEntryType o) {
         return this.getType().getName().compareTo(o.getType().getName());
     }
+
+    public Set<Field> getAuthorInformationFields() {
+        Set<Field> AuthorInformationFields = new LinkedHashSet<>(EntryConverter.FIELD_ALIASES_TEX_TO_LTX.keySet());
+
+        AuthorInformationFields.retainAll(getOptionalFieldsAndAliases());
+        AuthorInformationFields.add(StandardField.COUNTRY);
+
+        return AuthorInformationFields;
+    }
 }
